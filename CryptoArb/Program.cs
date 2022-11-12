@@ -61,7 +61,12 @@ namespace CryptoArb
 					response.ContentType = "text/css; charset=utf-8";
 					await response.SendFileAsync("css/style.css");
 				}
-				
+				else if (path == "/JavaScript/JavaScript.js" && request.Method == "GET")
+				{
+					response.ContentType = "text/javaScript; charset=utf-8";
+					await response.SendFileAsync("JavaScript/JavaScript.js");
+				}
+
 				else
 				{
 					response.ContentType = "text/html; charset=utf-8";
