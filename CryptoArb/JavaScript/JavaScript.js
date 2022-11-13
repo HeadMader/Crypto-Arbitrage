@@ -15,6 +15,7 @@ var filters = {
 	showQuoteAsset: true,
 	showSymbol: true,
 	showBond: true,
+	showRows: 1000,
 	profit: 0,
 	volume: 0,
 	exchangeId: 1,
@@ -29,22 +30,12 @@ const table = document.getElementById('bondsTable');
 const cols = table.querySelectorAll('th');
 
 // Loop over them
-SetWidthInPercentage();
+//SetWidthInPercentage();
 Resize();
 
-function SetWidthInPercentage() {
-	let windowSizeX = table.clientWidth;
-	var element = document.getElementById("Symbol");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-	var element = document.getElementById("ExchangeId");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-	var element = document.getElementById("Volume");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-	var element = document.getElementById("Profit");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-}
+
 function Resize() {
-	for (var i = 0; i < cols.length - 1; i++) {
+	for (var i = 0; i < cols.length; i++) {
 
 		// Create a resizer element
 		const resizer = document.createElement('div');
@@ -68,6 +59,7 @@ function createResizableColumn(col, resizer) {
 
 
 	const mouseDownHandler = function (e) {
+		reCalculateColonms();
 		// Get the current mouse position
 		x = e.clientX;
 
@@ -86,9 +78,9 @@ function createResizableColumn(col, resizer) {
 		const dx = e.clientX - x;
 
 		// Update the width of column
-		let windowSizeX = table.clientWidth;
-		console.log(windowSizeX);
-		col.style.width = `${(w + dx) / windowSizeX * 100}%`;
+		let tableSizeX = table.clientWidth;
+		col.style.width = `${(w + dx) / tableSizeX * 100}%`;
+		reCalculateColonms()
 	};
 
 	// When user releases the mouse, remove the existing event listeners
@@ -97,8 +89,50 @@ function createResizableColumn(col, resizer) {
 		document.removeEventListener('mouseup', mouseUpHandler);
 	};
 
+	function reCalculateColonms() {
+		let tableSizeX = table.clientWidth;
+		var elements = [];
+		elements.push(document.getElementById("No"));
+		elements.push(document.getElementById("Symbol"));
+		elements.push(document.getElementById("ExchangeId"));
+		elements.push(document.getElementById("Volume"));
+		elements.push(document.getElementById("Profit"));
+		elements.push(document.getElementById("Bond"));
+
+		if (elements[1].style.width == "") {
+			elements.forEach(element => element.style.width = `${element.clientWidth / tableSizeX * 100}%`);
+		} else {
+			let currentElementIndex = -1;
+			let widthBeforeElement = 0;
+			let widthAfterElement = 0;
+			let afterElement = false;
+			for (var i = 0; i < elements.length; i++) {
+				element = elements[i];
+				let width = element.clientWidth / tableSizeX * 100;
+
+				if (!afterElement) {
+					widthBeforeElement += width;
+				} else {
+					widthAfterElement += width;
+				}
+
+				if (elements[i].id == col.id) {
+					afterElement = true;
+					currentElementIndex = i;
+				}
+			}
+			let x = 100 - widthBeforeElement;
+			let y = x / widthAfterElement;
+			for (var i = currentElementIndex + 1; i < elements.length; i++) {
+				element = elements[i];
+				element.style.width = `${element.clientWidth / tableSizeX * 100*y}%`
+			}
+		}
+	}
+
 	resizer.addEventListener('mousedown', mouseDownHandler);
 };
+
 
 // Получение всех пользователей
 async function GetBinancePrices() {
@@ -259,16 +293,19 @@ async function UpdateTable() {
 	const rows = document.getElementById("bin");
 	rows.innerHTML = "";
 	SortBonds();
-	bonds.forEach(bond => rows.append(row(bond)));
+	for (var i = 0; i < filters.showRows; i++) {
+		let bond = bonds[i];
+		rows.append(row(bond));
+	}
 }
 //Call every 5 seconds get methods
-function update() {
+function Update() {
 	//GetKucoinPrices();
 	if (bonds != null)
 		UpdateTable();
 	GetBinancePrices();
 
-	setTimeout(update, 3000);
+	setTimeout(Update, 3000);
 }
 
 function row(bond) {
@@ -309,4 +346,4 @@ function row(bond) {
 // сброс значений формы
 
 SubscribeToEvent();
-update();
+Update();
