@@ -4,79 +4,202 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" type="text/css" href="../css/style.css">
-
+	<script>
+		
+	</script>
 </head>
 <body>
+	<div class="infofield"><p id="info">Success</p></div>
 	<div class="dropdown verdanafont">
-		<button class="dropbtn">Filters</button>
-		<div class="dropdown-content border">
-			<div id="filtersOptions" >
+		<button class="dropbtn" onclick="HideShow('filtersOptions')">Filters</button>
+		<div id="filtersOptions" class="dropdown-content border">
+			<div>
 				<div class="form-row nowrap">
-					<label class="uifont" style="display:inline">Volume</label><input id="volumeInput" class="uifont border" type="number" value="" style="display:inline" />
+					<label class="uifont" style="display:inline">Volume</label>
+					<input id="volumeInput" class="uifont border" min="0" step="100"
+						   placeholder="Enter number" type="number" value=""
+						   oninput="validateNumber(this)" />
 				</div>
 				<div class="form-row nowrap">
-					<label class="uifont">Profit</label><input id="profitInput" class="uifont border" type="number" value="" />
+					<label class="uifont">Profit</label>
+					<input id="profitInput" step="0.1" class="uifont border" type="number" min="0"
+						   placeholder="Enter number" value=""
+						   oninput="validateNumber(this)" />
 				</div>
 				<div class="form-row nowrap">
-					<button id="applyButton" class="apply">Apply</button>
+					<label class="uifont">Show rows</label>
+					<input id="showRows" step="1" class="uifont border" type="number" min="0"
+						   placeholder="Enter number" value="100"
+						   oninput="validateNumber(this)" />
+				</div>
+				<div class="form-row nowrap">
+					<button id="applyButton" class="apply" onclick="SetFilters(); UpdateTable();">Apply</button>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div class="dropdown verdanafont">
-		<button class="dropbtn">Bot</button>
-		<div class="dropdown-content border">
-			<div id="botOptions">
+		<button class="dropbtn" onclick="HideShow('botOptions')">Bot</button>
+		<div id="botOptions" class="dropdown-content border" style="min-width:450px">
+			<div>
 				<div>
-					<div>
-						<label class="uifont">Api Key</label><input id="apiKey" type="text" class="border" />
+					<div class="form-row nowrap">
+						<label class="uifont">Api Key</label>
+						<input id="apiKey" type="text" class="border" onchange="ValidateString('apiKey');" />
 					</div>
-					<div>
-						<label class="uifont">Secret Key</label><input id="secretKey" type="password" name="secretKey" value="" class="border" />
+					<div class="form-row nowrap">
+						<label class="uifont">Secret Key</label>
+						<input id="secretKey" type="text" name="secretKey" value="" class="border" onchange="ValidateString('secretKey');" />
 					</div>
+					<div class="form-row nowrap">
+						<label class="uifont">Max deal time(Min)</label>
+						<input id="maxDealTime" class="uifont border"
+							   min="0" step="1"
+							   placeholder="Enter number"
+							   type="number" value="3"
+							   oninput="validateNumber(this);" />
+					</div>
+					<div class="form-row nowrap">
+						<label class="uifont" style="display:inline">Volume</label>
+						<input id="volumeMin" class="uifont border" min="0" step="100"
+							   placeholder="Enter number" type="number" value="100000"
+							   oninput="validateNumber(this)" />
+					</div>
+					<div class="form-row nowrap">
+						<label class="uifont">Profit</label>
+						<input id="profitMin" step="0.1" class="uifont border" type="number" min="0"
+							   placeholder="Enter number" value="0.5"
+							   oninput="validateNumber(this)" />
+					</div>
+					<div class="form-row nowrap">
+						<label id="useOfWalletLa" class="uifont">Use of wallet(100%)</label>
+						<input id="useOfWalletIn" class="uifont border"
+							   min="0" max="100" value="100"
+							   type="range" oninput="document.getElementById('useOfWalletLa').innerHTML = 'Use of wallet(' +  this.value + '%)'" />
+					</div>
+				</div>
+				<div class="form-row nowrap">
+					<button id="StartBot" class="apply" onclick="StartBot();">Start</button>
+					<button id="StopBot" class="stop" onclick="StopBot();">Stop</button>
 				</div>
 			</div>
 		</div>
+		<script>
+
+			ApiKeyElem = document.getElementById("apiKey");
+			KeyElem = document.getElementById("secretKey");
+
+			async function StartBot() {
+				
+				Form(ApiKeyElem.value, KeyElem.value);
+			}
+			async function StopBot() {
+
+				Info("Stoped ⛔️", 5000);
+			}
+			async function Init() {
+				const rawResponse = await fetch("/api/init", {
+					method: 'GET',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					}
+				});
+				const content = await rawResponse.json();
+				ApiKeyElem.value = content.apiKey;
+				KeyElem.value = content.apiSecretKey
+				console.log(content);
+			}
+			Init();
+
+		</script>
 	</div>
+	<script>
 
-	<div class="tableContainer">
-		<table id="bondsTable" class="table" style="min-width:1200px">
-			<thead>
-				<tr>
-					<th style="width:5%">
-						№
-					</th>
-					<th id="Symbol">
-						<button id="symbolbutton" class="flat">
-							Symbol <img id="symbolsort" style="height: 12px; align-self: center; margin:1px 0 0 5px; transform: scale(0)" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/TriangleArrow-Up.svg/532px-TriangleArrow-Up.svg.png?20060109153010">
-						</button>
-					</th>
-					<th id="ExchangeId">
-						<button id="exchangeIdbutton" class="flat">
-							ExchangeId <img id="exchangeIdsort" style="height: 12px; align-self: center; margin:1px 0 0 5px; transform: scale(0)" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/TriangleArrow-Up.svg/532px-TriangleArrow-Up.svg.png?20060109153010">
-						</button>
-					</th>
-					<th id="Volume">
-						<button id="volumebutton" class="flat">
-							Volume <img id="volumesort" style="height: 12px; align-self: center; margin:1px 0 0 5px; transform: scale(0)" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/TriangleArrow-Up.svg/532px-TriangleArrow-Up.svg.png?20060109153010">
-						</button>
-					</th>
-					<th id="Profit">
-						<button id="profitbutton" class="flat">
-							Profit <img id="profitsort" style="height: 12px; align-self: center; margin:1px 0 0 5px; transform: scale(0)" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/TriangleArrow-Up.svg/532px-TriangleArrow-Up.svg.png?20060109153010">
-						</button>
-					</th>
-					<th id="Bond">
+		document.getElementById("filtersOptions").hidden = true;
+		document.getElementById("botOptions").hidden = true;
 
-						Bond
-					</th>
-				</tr>
-			</thead>
-			<tbody id="bin">
-			</tbody>
-		</table>
+		var last;
+
+		function HideShow(name) {
+			element = document.getElementById(name);
+			if (last == null) {
+				element.hidden = false;
+				last = element;
+				return;
+			}
+			if (last.id != element.id) {
+
+				last.hidden = true;
+				element.hidden = false;
+				last = element;
+			} else {
+				element.hidden = !element.hidden;
+			}
+		}
+		function validateNumber(element) {
+
+			if (isNaN(element.valueAsNumber)) {
+				element.style = "background-color: #ffbcbc"
+			}
+			else {
+				element.style = "background-color: #ffffff"
+			}
+
+		}
+		function ValidateString(elementName) {
+			var element = document.getElementById(elementName);
+			if (element.value.length != 64) {
+				element.value = "";
+				element.placeholder = "Invalid key"
+				element.style = "background-color: #ffbcbc"
+			} else {
+				element.style = "background-color: #ffffff"
+			}
+		}
+
+	</script>
+	<div>
+		<div style="padding: 20px; display: inline-block;">
+			<table id="bondsTable" style="border-right:0; border-bottom:0;">
+				<thead>
+					<tr class="unselectable">
+						<th>
+							№
+							<span class="resize-handle"></span>
+						</th>
+						<th id="Symbol">
+							Symbol
+							<img id="symbolsort" class="sortArrow" src="https://static.vecteezy.com/system/resources/previews/001/200/602/original/triangle-png.png" />
+							<span class="resize-handle"></span>
+						</th>
+						<th id="ExchangeId">
+							ExchangeId
+							<img id="exchangeIdsort" class="sortArrow" src="https://static.vecteezy.com/system/resources/previews/001/200/602/original/triangle-png.png" />
+							<span class="resize-handle"></span>
+						</th>
+						<th id="Volume">
+							Volume
+							<img id="volumesort" class="sortArrow" src="https://static.vecteezy.com/system/resources/previews/001/200/602/original/triangle-png.png" />
+							<span class="resize-handle"></span>
+						</th>
+						<th id="Profit">
+							Profit
+							<img id="profitsort" class="sortArrow" src="https://static.vecteezy.com/system/resources/previews/001/200/602/original/triangle-png.png" />
+							<span class="resize-handle"></span>
+						</th>
+						<th id="Bond">
+							Bond
+							<span class="resize-handle"></span>
+						</th>
+					</tr>
+				</thead>
+				<tbody id="bin">
+				</tbody>
+			</table>
+		</div>
 	</div>
-
 	<script src="../JavaScript/JavaScript.js"></script>
+	<script src="../JavaScript/TableResize.js"></script>
 </body>
 </html>

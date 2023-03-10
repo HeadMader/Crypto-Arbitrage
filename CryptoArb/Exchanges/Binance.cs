@@ -1,15 +1,8 @@
 ﻿using Binance.Net.Clients;
 using Binance.Net.Interfaces;
 using Binance.Net.Objects.Models.Spot;
-using CryptoExchange.Net.Objects;
-using CryptoExchange.Net;
-using System.Net;
-using Binance.Net.Objects;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography.Xml;
 using Newtonsoft.Json.Linq;
-using static System.Net.Mime.MediaTypeNames;
+using System.Net;
 
 namespace CryptoArb
 {
@@ -23,96 +16,140 @@ namespace CryptoArb
 
 		BinanceClient client = new();
 
-		public async Task CheckWallet()
+		static string key = Settings.Default.ApiKey;
+		static string apikey = Settings.Default.ApiSecretKey;
+
+		#region account control methods
+#if DEBUG
+		public static async Task<(string, HttpStatusCode)> CheckWallet()
 		{
-			var key = "XfPsqP0FLyTR2TbNpfWdczxSU6DueoT6ryn0K0dRc9yV0ilgsBwBEUgrcat9OmGo";
-			var apikey = "oEBgQ1I4e6IT2nNpCqIc4aQNItgWLYvn3GSh2ExUg5MW9K4QFqMFfUzzx2erxian";
-
-			var timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
 			var values = new Dictionary<string, string>
 				{
 					{ "recvWindow", "5000" },
-					{ "timestamp", $"{timeStamp}" },
 				};
-
-			var query = await new FormUrlEncodedContent(values).ReadAsStringAsync();
-
-			var signature = Cryptography.HashHMACSHA256(key, query);
-
-			values.Add("signature", signature);
 
 			Dictionary<string, string> headers = new()
 				{
-					{"X-MBX-APIKEY",apikey}
+					{"X-MBX-APIKEY",key}
 				};
-			var content = await Request("https://api.binance.com/sapi/v1/capital/config/getall", "GET", values, headers);
 
-			Console.WriteLine(await content.ReadAsStringAsync());
+			var response = await Request("https://api.binance.com/sapi/v1/capital/config/getall", "GET", BinanceValues(values), headers);
+
+			return (await response.Content.ReadAsStringAsync(), response.StatusCode);
+		}
+
+		public static async Task<(string, HttpStatusCode)> CheckApiKey()
+		{
+			var values = new Dictionary<string, string>
+				{
+					{ "recvWindow", "5000" },
+				};
+
+			Dictionary<string, string> headers = new()
+				{
+					{"X-MBX-APIKEY",key}
+				};
+
+			var response = await Request("https://api.binance.com/sapi/v1/account/apiTradingStatus", "GET", BinanceValues(values), headers);
+
+			return (await response.Content.ReadAsStringAsync(), response.StatusCode);
 
 		}
-		public async Task AccountSnapshot()
-		{
-			var key = "XfPsqP0FLyTR2TbNpfWdczxSU6DueoT6ryn0K0dRc9yV0ilgsBwBEUgrcat9OmGo";
-			var apikey = "oEBgQ1I4e6IT2nNpCqIc4aQNItgWLYvn3GSh2ExUg5MW9K4QFqMFfUzzx2erxian";
 
+		public static async Task<(string, HttpStatusCode)> CheckUserAsset()
+		{
+			var values = new Dictionary<string, string>
+				{
+					{ "recvWindow", "5000" },
+				};
+
+			Dictionary<string, string> headers = new()
+				{
+					{"X-MBX-APIKEY",key}
+				};
+
+			var response = await Request("https://api.binance.com/sapi/v3/asset/getUserAsset", "POST", BinanceValues(values), headers);
+
+			return (await response.Content.ReadAsStringAsync(), response.StatusCode);
+
+		}
+
+		public static async Task<(string, HttpStatusCode)> AccountSnapshot(double days)
+		{
 			var timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+			var startTime = timeStamp - TimeSpan.FromDays(days).TotalMilliseconds;
 
 			var values = new Dictionary<string, string>
 				{
 					{ "type", "SPOT" },
-					{ "startTime","1666137599000"},
 					{ "recvWindow", "5000" },
-					{ "timestamp", $"{timeStamp}" },
+					{ "startTime",$"{startTime}"},
 				};
-
-			var query = await new FormUrlEncodedContent(values).ReadAsStringAsync();
-
-			var signature = Cryptography.HashHMACSHA256(key, query);
-
-			values.Add("signature", signature);
 
 			Dictionary<string, string> headers = new()
 				{
-					{"X-MBX-APIKEY",apikey}
+					{"X-MBX-APIKEY",key}
 				};
-			var content = await Request("https://api.binance.com/sapi/v1/accountSnapshot", "GET", values, headers);
 
-			Console.WriteLine(await content.ReadAsStringAsync());
+			var response = await Request("https://api.binance.com/sapi/v1/accountSnapshot", "GET", BinanceValues(values), headers);
+
+			return (await response.Content.ReadAsStringAsync(), response.StatusCode);
 
 		}
-		public async Task Wi()
+
+		public static async Task<(string, HttpStatusCode)> EnableFastWithdraw()
 		{
-			var key = "XfPsqP0FLyTR2TbNpfWdczxSU6DueoT6ryn0K0dRc9yV0ilgsBwBEUgrcat9OmGo";
-			var apikey = "oEBgQ1I4e6IT2nNpCqIc4aQNItgWLYvn3GSh2ExUg5MW9K4QFqMFfUzzx2erxian";
+			Dictionary<string, string> headers = new()
+				{
+					{"X-MBX-APIKEY",key}
+				};
 
-			var timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+			var response = await Request("https://api.binance.com/sapi/v1/account/enableFastWithdrawSwitch", "POST", BinanceValues(null), headers);
 
+			return (await response.Content.ReadAsStringAsync(), response.StatusCode);
+		}
+
+		public static async Task<(string, HttpStatusCode)> Withdraw(Dictionary<string, string> withdrawData)
+		{
 			var values = new Dictionary<string, string>
 				{
-					{ "type", "SPOT" },
-					{ "startTime","1666137599000"},
-					{ "recvWindow", "5000" },
-					{ "timestamp", $"{timeStamp}" },
+					{ "coin", "USDT" },
+					{ "address", "0xf587ed4f5091156e4251dd466358117a49a3539c" },
+					{ "amount", "1"},
 				};
-
-			var query = await new FormUrlEncodedContent(values).ReadAsStringAsync();
-
-			var signature = Cryptography.HashHMACSHA256(key, query);
-
-			values.Add("signature", signature);
 
 			Dictionary<string, string> headers = new()
 				{
-					{"X-MBX-APIKEY",apikey}
+					{"X-MBX-APIKEY",key}
 				};
-			var content = await Request("https://api.binance.com/sapi/v1/accountSnapshot", "GET", values, headers);
 
-			Console.WriteLine(await content.ReadAsStringAsync());
+			var response = await Request("https://api.binance.com/sapi/v1/capital/withdraw/apply", "POST", BinanceValues(values), headers);
+
+			return (await response.Content.ReadAsStringAsync(), response.StatusCode);
 
 		}
 
-		public async Task<HttpContent> Request(string Url, string httpMethod,
+		public static async Task<(string, HttpStatusCode)> Trade(Dictionary<string, string> tradeData)
+		{
+			Dictionary<string, string> headers = new()
+				{
+					{"X-MBX-APIKEY",key}
+				};
+
+			var response = await Request("https://api.binance.com/api/v3/order", "POST", BinanceValues(tradeData), headers);
+
+			return (await response.Content.ReadAsStringAsync(), response.StatusCode);
+		}
+
+		/// <summary>
+		/// Create vary simple requests
+		/// </summary>
+		/// <param name="Url"></param>
+		/// <param name="httpMethod"></param>
+		/// <param name="values"></param>
+		/// <param name="headers"></param>
+		/// <returns><see cref="HttpResponseMessage"/></returns>
+		private async static Task<HttpResponseMessage> Request(string Url, string httpMethod,
 			IEnumerable<KeyValuePair<string, string>>? values = null,
 			IEnumerable<KeyValuePair<string, string>>? headers = null)
 		{
@@ -122,13 +159,18 @@ namespace CryptoArb
 				HttpResponseMessage response = null!;
 				HttpContent content = null!;
 
+
 				if (headers != null)
 					foreach (var header in headers)
 					{
 						httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
 					}
+
 				if (values != null)
+				{
 					content = new FormUrlEncodedContent(values);
+				}
+
 
 				switch (httpMethod)
 				{
@@ -142,9 +184,40 @@ namespace CryptoArb
 						response = await httpClient.GetAsync(s);
 						break;
 				}
-				return response.Content;
+				return response;
 			}
 		}
+
+		/// <summary>
+		/// Adds specific values that Binance needs for request
+		/// </summary>
+		/// <param name="values">your values for request</param>
+		/// <returns><see cref="IEnumerable{KeyValuePair}"/> with Binance specific values</returns>
+		private static IEnumerable<KeyValuePair<string, string>> BinanceValues(IEnumerable<KeyValuePair<string, string>>? values)
+		{
+			var timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+			var baseAndUserValues = new Dictionary<string, string>();
+
+			var baseValues = new Dictionary<string, string>
+				{
+					{ "timestamp", $"{timeStamp}" },
+			};
+
+			if (values != null)
+				baseAndUserValues = values.Concat(baseValues).ToDictionary(x => x.Key, x => x.Value);
+			else baseAndUserValues = baseValues;
+
+			var query = string.Join("&", baseAndUserValues.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+
+			var signature = Cryptography.HashHMACSHA256(apikey, query!);
+			baseAndUserValues.Add("signature", signature);
+
+			return baseAndUserValues;
+		}
+#endif
+		#endregion
+
+
 
 		protected override async Task ProcessProducts()
 		{
@@ -175,17 +248,23 @@ namespace CryptoArb
 							Products.Add(product);
 						}
 					}
-
 				}
 			}
-
-
 		}
+
+		/// <summary>
+		/// Converts product data from exchange to <see cref="Product"></see>
+		/// </summary>
+		/// <typeparam name="P"></typeparam>
+		/// <typeparam name="A"></typeparam>
+		/// <param name="tickerInfo">ticker info of symbol</param>
+		/// <param name="symbolInfo">symbol info</param>
+		/// <returns>converted symbol</returns>
+		/// <exception cref="Exception"></exception>
 		protected override Product ToProduct<P, A>(P tickerInfo, A symbolInfo)
 		{
 			if (tickerInfo is IBinanceTick tick && symbolInfo is BinanceSymbol symbol)
 			{
-
 				Product product = new();
 				product.Symbol = tick.Symbol;
 				product.USymbol = tick.Symbol; // ID is like this BTCUSDT not BTC-USDT 
@@ -204,4 +283,3 @@ namespace CryptoArb
 		}
 	}
 }
-

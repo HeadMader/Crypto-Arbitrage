@@ -1,0 +1,349 @@
+{
+	"code": 200,
+	"msg": "",
+	"snapshotVos": [
+		{
+			"type": "spot",
+			"updateTime": 1672531199000,
+			"data": {
+				"totalAssetOfBtc": "0.01623264",
+				"balances": [
+					{
+						"asset": "BNB",
+						"free": "0.02686438",
+						"locked": "0"
+					},
+					{
+						"asset": "BUSD",
+						"free": "0.47050277",
+						"locked": "0"
+					},
+					{
+						"asset": "DASH",
+						"free": "0.06467853",
+						"locked": "0"
+					},
+					{
+						"asset": "DOGE",
+						"free": "68.8488",
+						"locked": "0"
+					},
+					{
+						"asset": "LTC",
+						"free": "0.21539944",
+						"locked": "0"
+					},
+					{
+						"asset": "SOL",
+						"free": "0.009825",
+						"locked": "0"
+					},
+					{
+						"asset": "UAH",
+						"free": "2.39305",
+						"locked": "0"
+					},
+					{
+						"asset": "USDT",
+						"free": "238.62981173",
+						"locked": "0"
+					}
+				]
+			}
+		},
+		{
+			"type": "spot",
+			"updateTime": 1672617599000,
+			"data": {
+				"totalAssetOfBtc": "0.016168",
+				"balances": [
+					{
+						"asset": "BNB",
+						"free": "0.02686438",
+						"locked": "0"
+					},
+					{
+						"asset": "BUSD",
+						"free": "0.47050277",
+						"locked": "0"
+					},
+					{
+						"asset": "DASH",
+						"free": "0.06467853",
+						"locked": "0"
+					},
+					{
+						"asset": "DOGE",
+						"free": "68.8488",
+						"locked": "0"
+					},
+					{
+						"asset": "LTC",
+						"free": "0.21539944",
+						"locked": "0"
+					},
+					{
+						"asset": "SOL",
+						"free": "0.009825",
+						"locked": "0"
+					},
+					{
+						"asset": "UAH",
+						"free": "2.39305",
+						"locked": "0"
+					},
+					{
+						"asset": "USDT",
+						"free": "238.62981173",
+						"locked": "0"
+					}
+				]
+			}
+		},
+		{
+			"type": "spot",
+			"updateTime": 1672703999000,
+			"data": {
+				"totalAssetOfBtc": "0.01617655",
+				"balances": [
+					{
+						"asset": "BNB",
+						"free": "0.02686438",
+						"locked": "0"
+					},
+					{
+						"asset": "BUSD",
+						"free": "0.47050277",
+						"locked": "0"
+					},
+					{
+						"asset": "DASH",
+						"free": "0.06467853",
+						"locked": "0"
+					},
+					{
+						"asset": "DOGE",
+						"free": "68.8488",
+						"locked": "0"
+					},
+					{
+						"asset": "LTC",
+						"free": "0.21539944",
+						"locked": "0"
+					},
+					{
+						"asset": "SOL",
+						"free": "0.009825",
+						"locked": "0"
+					},
+					{
+						"asset": "UAH",
+						"free": "2.39305",
+						"locked": "0"
+					},
+					{
+						"asset": "USDT",
+						"free": "238.62981173",
+						"locked": "0"
+					}
+				]
+			}
+		},
+		{
+			"type": "spot",
+			"updateTime": 1672790399000,
+			"data": {
+				"totalAssetOfBtc": "0.01618029",
+				"balances": [
+					{
+						"asset": "BNB",
+						"free": "0.02686438",
+						"locked": "0"
+					},
+					{
+						"asset": "BUSD",
+						"free": "0.47050277",
+						"locked": "0"
+					},
+					{
+						"asset": "DASH",
+						"free": "0.06467853",
+						"locked": "0"
+					},
+					{
+						"asset": "DOGE",
+						"free": "68.8488",
+						"locked": "0"
+					},
+					{
+						"asset": "LTC",
+						"free": "0.21539944",
+						"locked": "0"
+					},
+					{
+						"asset": "SOL",
+						"free": "0.009825",
+						"locked": "0"
+					},
+					{
+						"asset": "UAH",
+						"free": "2.39305",
+						"locked": "0"
+					},
+					{
+						"asset": "USDT",
+						"free": "238.62981173",
+						"locked": "0"
+					}
+				]
+			}
+		},
+		{
+			"type": "spot",
+			"updateTime": 1672876799000,
+			"data": {
+				"totalAssetOfBtc": "0.01605372",
+				"balances": [
+					{
+						"asset": "BNB",
+						"free": "0.02686438",
+						"locked": "0"
+					},
+					{
+						"asset": "BUSD",
+						"free": "0.47050277",
+						"locked": "0"
+					},
+					{
+						"asset": "DASH",
+						"free": "0.06467853",
+						"locked": "0"
+					},
+					{
+						"asset": "DOGE",
+						"free": "68.8488",
+						"locked": "0"
+					},
+					{
+						"asset": "LTC",
+						"free": "0.21539944",
+						"locked": "0"
+					},
+					{
+						"asset": "SOL",
+						"free": "0.009825",
+						"locked": "0"
+					},
+					{
+						"asset": "UAH",
+						"free": "2.39305",
+						"locked": "0"
+					},
+					{
+						"asset": "USDT",
+						"free": "238.62981173",
+						"locked": "0"
+					}
+				]
+			}
+		},
+		{
+			"type": "spot",
+			"updateTime": 1672963199000,
+			"data": {
+				"totalAssetOfBtc": "0.01604136",
+				"balances": [
+					{
+						"asset": "BNB",
+						"free": "0.02686438",
+						"locked": "0"
+					},
+					{
+						"asset": "BUSD",
+						"free": "0.47050277",
+						"locked": "0"
+					},
+					{
+						"asset": "DASH",
+						"free": "0.06467853",
+						"locked": "0"
+					},
+					{
+						"asset": "DOGE",
+						"free": "68.8488",
+						"locked": "0"
+					},
+					{
+						"asset": "LTC",
+						"free": "0.21539944",
+						"locked": "0"
+					},
+					{
+						"asset": "SOL",
+						"free": "0.009825",
+						"locked": "0"
+					},
+					{
+						"asset": "UAH",
+						"free": "2.39305",
+						"locked": "0"
+					},
+					{
+						"asset": "USDT",
+						"free": "238.62981173",
+						"locked": "0"
+					}
+				]
+			}
+		},
+		{
+			"type": "spot",
+			"updateTime": 1673049599000,
+			"data": {
+				"totalAssetOfBtc": "0.01596179",
+				"balances": [
+					{
+						"asset": "BNB",
+						"free": "0.02686438",
+						"locked": "0"
+					},
+					{
+						"asset": "BUSD",
+						"free": "0.47050277",
+						"locked": "0"
+					},
+					{
+						"asset": "DASH",
+						"free": "0.06467853",
+						"locked": "0"
+					},
+					{
+						"asset": "DOGE",
+						"free": "68.8488",
+						"locked": "0"
+					},
+					{
+						"asset": "LTC",
+						"free": "0.21539944",
+						"locked": "0"
+					},
+					{
+						"asset": "SOL",
+						"free": "0.009825",
+						"locked": "0"
+					},
+					{
+						"asset": "UAH",
+						"free": "2.39305",
+						"locked": "0"
+					},
+					{
+						"asset": "USDT",
+						"free": "238.62981173",
+						"locked": "0"
+					}
+				]
+			}
+		}
+	]
+}

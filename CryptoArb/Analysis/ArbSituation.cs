@@ -1,12 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Linq;
+﻿using CryptoArb.DataBase;
+using Microsoft.EntityFrameworkCore;
 
 namespace CryptoArb.analysis
 {
 	public static class ArbSituation
 	{
-
+		/// <summary>
+		/// Searching bonds by coompairing symbol prices on exchange
+		/// </summary>
+		/// <param name="exchangeId">Exchange id</param>
+		/// <param name="volumeFilterUSD">Symbol volume in USD</param>
+		/// <param name="profitFilter">Bond profit</param>
+		/// <returns>List if bonds with specific filters</returns>
 		public async static Task<List<Bond>> TriangularSearch(int? exchangeId = 0, float? volumeFilterUSD = 0, float? profitFilter = 0)
 		{
 			List<Bond> bonds = new();
@@ -21,9 +26,6 @@ namespace CryptoArb.analysis
 
 			foreach (Exchange ex in exchanges)
 			{
-				Stopwatch stopwatch = new Stopwatch();
-
-				stopwatch.Start();
 				int id = 0;
 				foreach (Product product in ex.Products)
 				{
@@ -35,7 +37,6 @@ namespace CryptoArb.analysis
 					List<Product> baseAssetProducts = ex.Products.
 						Where(c => c.baseAsset == baseAsset &&
 						c.quoteAsset != quoteAsset).ToList();
-
 					//get products that have as base asset quote asset of the product
 					List<Product> quoteAssetProducts = ex.Products.
 						Where(c => c.baseAsset == quoteAsset &&
@@ -73,32 +74,26 @@ namespace CryptoArb.analysis
 								result > 0 ? quoteAsset! : baseAsset!,
 								quoteAssetProduct.quoteAsset!
 								};
-								bonds.Add(new Bond(
-									id,
-									BondType.IntraTringle,
-									product.USymbol,
-									baseAssetProduct.USymbol,
-									(float)profit,
-									product.Volume,
-									Math.Round(productVolumeUSD, 0),
-									ex.ID,
-									sequencing
-									));
+								bonds.Add(new Bond() {
+									ID = id,
+									BondType = BondType.IntraTringle,
+									USymbol = product.USymbol,
+									BaseProduct = baseAssetProduct.USymbol,
+									Profit = (float)profit,
+									Volume = product.Volume,
+									VolumeUSD = Math.Round(productVolumeUSD, 0),
+									ExchangeId = ex.ID,
+									Sequencing = sequencing
+								});
 								id++;
 							}
 						}
 					}
-				}
-				stopwatch.Stop();
-				Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
+				}
 			}
 			return bonds;
 		}
-
-	//	public async static Task<List<Bond>> SortTrBond(List<Bond> bonds, int symbol, int profit, int volume, int baseAsset,int quoteAsset) 
-	//	{ 
-		
-	//	} 
 	}
 }
+

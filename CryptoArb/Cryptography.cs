@@ -13,5 +13,10 @@ namespace CryptoArb
 
 			return BitConverter.ToString(hash.ComputeHash(textBite)).Replace("-", "").ToLower();
 		}
+		
+		public static string SHA256(string text)
+		{
+			return "";
+		}
 	}
 }

@@ -56,6 +56,14 @@ namespace CryptoArb
 			}
 		}
 
+		/// <summary>
+		/// Converts product data from exchange to <see cref="Product"></see>
+		/// </summary>
+		/// <typeparam name="P"></typeparam>
+		/// <typeparam name="A"></typeparam>
+		/// <param name="productExchangeObj"></param>
+		/// <param name="productExchangeObj2"></param>
+		/// <returns><see cref="Product"></see></returns>
 		protected override Product ToProduct<P, A>(P tickerInfo, A symbolInfo)
 		{
 			if (tickerInfo is KucoinAllTick tick && symbolInfo is KucoinSymbol symbol)

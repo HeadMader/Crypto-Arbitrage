@@ -1,5 +1,6 @@
 ﻿var last;
-var bonds;
+var bonds = [];
+var infoTimeoutID;
 var sortParams = {
 	symbol: 0,
 	baseAsset: 0,
@@ -15,97 +16,17 @@ var filters = {
 	showQuoteAsset: true,
 	showSymbol: true,
 	showBond: true,
+	showRows: 100,
 	profit: 0,
 	volume: 0,
 	exchangeId: 1,
 }
 
-
-document.getElementById("filtersOptions").hidden = true;
-document.getElementById("botOptions").hidden = true;
-
-
-const table = document.getElementById('bondsTable');
-const cols = table.querySelectorAll('th');
-
-// Loop over them
-SetWidthInPercentage();
-Resize();
-
-function SetWidthInPercentage() {
-	let windowSizeX = table.clientWidth;
-	var element = document.getElementById("Symbol");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-	var element = document.getElementById("ExchangeId");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-	var element = document.getElementById("Volume");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-	var element = document.getElementById("Profit");
-	element.style.width = `${element.clientWidth / windowSizeX * 100}%`;
-}
-function Resize() {
-	for (var i = 0; i < cols.length - 1; i++) {
-
-		// Create a resizer element
-		const resizer = document.createElement('div');
-		resizer.classList.add('resizer');
-
-		// Set the height
-		resizer.style.height = `${table.offsetHeight}px`;
-
-		// Add a resizer element to the column
-		cols[i].appendChild(resizer);
-
-		// Will be implemented in the next section
-		createResizableColumn(cols[i], resizer);
-	}
-}
-
-function createResizableColumn(col, resizer) {
-	// Track the current position of mouse
-	let x = 0;
-	let w = 0;
-
-
-	const mouseDownHandler = function (e) {
-		// Get the current mouse position
-		x = e.clientX;
-
-		// Calculate the current width of column
-		const styles = window.getComputedStyle(col);
-		w = parseInt(styles.width, 10);
-
-		console.log(w);
-		// Attach listeners for document's events
-		document.addEventListener('mousemove', mouseMoveHandler);
-		document.addEventListener('mouseup', mouseUpHandler);
-	};
-
-	const mouseMoveHandler = function (e) {
-		// Determine how far the mouse has been moved
-		const dx = e.clientX - x;
-
-		// Update the width of column
-		let windowSizeX = table.clientWidth;
-		console.log(windowSizeX);
-		col.style.width = `${(w + dx) / windowSizeX * 100}%`;
-	};
-
-	// When user releases the mouse, remove the existing event listeners
-	const mouseUpHandler = function () {
-		document.removeEventListener('mousemove', mouseMoveHandler);
-		document.removeEventListener('mouseup', mouseUpHandler);
-	};
-
-	resizer.addEventListener('mousedown', mouseDownHandler);
-};
-
-// Получение всех пользователей
 async function GetBinancePrices() {
 	const binancePricesResponse = await fetch("/api/intraexchangebond?" + new URLSearchParams({
 		exchangeId: filters.exchangeId.toString(),
-		volume: filters.volume.toString(),
-		profit: filters.profit.toString(),
+		volume: 0,
+		profit: 0,
 	}, {
 		method: "GET",
 		headers: { "Accept": "application/json" },
@@ -114,26 +35,68 @@ async function GetBinancePrices() {
 	if (binancePricesResponse.ok) {
 		const binance = await binancePricesResponse.json();
 		bonds = binance;
-
+	} else {
+		console.error("bonds")
 	}
 }
 
-function SubscribeToEvent() {
-	document.getElementById("symbolbutton").addEventListener("click", SymbolSort);
-	document.getElementById("exchangeIdbutton").addEventListener("click", ExchangeIdSort);
-	document.getElementById("volumebutton").addEventListener("click", VolumeSort);
-	document.getElementById("profitbutton").addEventListener("click", ProfitSort);
+async function Form(apiId, key) {
+	const rawResponse = await fetch("/api/data", {
+		method: 'POST',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ "ApiID": apiId, "Key": key })
+	});
+	try {
+		const content = await rawResponse.json();
+	} catch (error) {
+		console.error(error);
+		content = "";
+	}
+	if (rawResponse.status == 200) {
+		Info("Success ✅", 5000);
+	} else {
+		Info("Faild To Start ❌", 5000)
+	}
+	//console.log(content);
+	//return content.isSuccess;
+}
+function Info(text, time) {
+	info = document.getElementById("info");
+	if (infoTimeoutID != null) {
+		clearTimeout(infoTimeoutID);
+	}
+	info.parentElement.hidden = false;
+	info.innerHTML = text;
+	infoTimeoutID = setTimeout(() => { info.parentElement.hidden = true; }, time);
+}
 
-	document.getElementById("applyButton").addEventListener("click", SetFilters);
+function SubscribeToEvent() {
+	document.getElementById("Symbol").addEventListener("click", SymbolSort);
+	document.getElementById("ExchangeId").addEventListener("click", ExchangeIdSort);
+	document.getElementById("Volume").addEventListener("click", VolumeSort);
+	document.getElementById("Profit").addEventListener("click", ProfitSort);
 }
 
 function SetFilters() {
 	let volumeInput = document.getElementById("volumeInput");
 	let profitInput = document.getElementById("profitInput");
+	let showRows = document.getElementById("showRows");
 
-	filters.volume = parseFloat(volumeInput.value);
-	filters.profit = parseFloat(profitInput.value);
+	filters.showRows = ValidateApply(showRows);
+	filters.volume = ValidateApply(volumeInput);
+	filters.profit = ValidateApply(profitInput);
+
+	function ValidateApply(inputField) {
+		if (isNaN(inputField.valueAsNumber)) {
+			return 0;
+		}
+		return inputField.valueAsNumber;
+	}
 }
+
 
 // --------------------------SORTS-----------------------------
 function SymbolSort() {
@@ -222,25 +185,25 @@ function clearSorts() {
 	document.getElementById("profitsort").style.transform = scale;
 }
 
-async function SortBonds() {
+function SortBonds(array) {
 
 	if (sortParams.symbol != 0) {
-		bonds.sort((p1, p2) => sortParams.symbol * (p1.uSymbol > p2.uSymbol ? 1 : -1));
+		array.sort((p1, p2) => sortParams.symbol * (p1.uSymbol > p2.uSymbol ? 1 : -1));
 	}
 	else if (sortParams.baseAsset != 0) {
-		bonds.sort((p1, p2) => sortParams.baseAsset * (p1.baseAsset > p2.baseAsset ? 1 : -1));
+		array.sort((p1, p2) => sortParams.baseAsset * (p1.baseAsset > p2.baseAsset ? 1 : -1));
 	}
 	else if (sortParams.quoteAsset != 0) {
-		bonds.sort((p1, p2) => sortParams.quoteAsset * (p1.quoteAsset > p2.quoteAsset ? 1 : -1));
+		array.sort((p1, p2) => sortParams.quoteAsset * (p1.quoteAsset > p2.quoteAsset ? 1 : -1));
 	}
 	else if (sortParams.profit != 0) {
-		bonds.sort((p1, p2) => sortParams.profit * (p1.profit > p2.profit ? 1 : -1));
+		array.sort((p1, p2) => sortParams.profit * (p1.profit > p2.profit ? 1 : -1));
 	}
 	else if (sortParams.volumeUSD != 0) {
-		bonds.sort((p1, p2) => sortParams.volumeUSD * (p1.volumeUSD > p2.volumeUSD ? 1 : -1));
+		array.sort((p1, p2) => sortParams.volumeUSD * (p1.volumeUSD > p2.volumeUSD ? 1 : -1));
 	}
 	else if (sortParams.exchangeId != 0) {
-		bonds.sort((p1, p2) => {
+		array.sort((p1, p2) => {
 			let k = sortParams.exchangeId;
 			if (p1.exchangeId > p2.exchangeId) { return k; }
 			if (p1.exchangeId < p2.exchangeId) { return -K; }
@@ -250,26 +213,41 @@ async function SortBonds() {
 		});
 	}
 	else {
-
-		bonds.sort((p1, p2) => p1.id > p2.id ? 1 : -1);
+		array.sort((p1, p2) => p1.id > p2.id ? 1 : -1);
 	}
+}
+
+function Filter() {
+	return bonds.filter(bond => bond.profit >= filters.profit && bond.volumeUSD >= filters.volume);
 }
 
 async function UpdateTable() {
 	const rows = document.getElementById("bin");
 	rows.innerHTML = "";
-	SortBonds();
-	bonds.forEach(bond => rows.append(row(bond)));
+	var array = Filter();
+	SortBonds(array);
+
+	for (var i = 0; i < filters.showRows; i++) {
+		let bond = array[i];
+		rows.append(row(bond));
+	}
 }
 //Call every 5 seconds get methods
-function update() {
+function Update() {
 	//GetKucoinPrices();
-	if (bonds != null)
-		UpdateTable();
-	GetBinancePrices();
 
-	setTimeout(update, 3000);
+	GetBinancePrices();
+	if (bonds.length > 0)
+		UpdateTable();
+	else {
+		Info("Loading...", 5000);
+	}
+
+	setTimeout(Update, 5000);
 }
+
+setTimeout(Info, 136070, "Found ⏱", 5000);
+setTimeout(Info, 246070, "Finish +0.7556% 📈", 5000);
 
 function row(bond) {
 
@@ -277,9 +255,9 @@ function row(bond) {
 	let id = tbody.childElementCount;
 
 	const tr = document.createElement("tr");
-	tr.setAttribute("data-rowid", bond.uSymbol);
+	tr.setAttribute("data-rowid", id);
 
-
+	let x = bonds;
 	const idTd = document.createElement("td");
 	idTd.append(id);
 	tr.append(idTd);
@@ -289,7 +267,7 @@ function row(bond) {
 	tr.append(USymbolTd);
 
 	const exchangeIDTd = document.createElement("td");
-	exchangeIDTd.append(bond.exchangeId);
+	exchangeIDTd.append(bond.exchangeId == 1 ? "Binance": 1 );
 	tr.append(exchangeIDTd);
 
 	const VolumeUSDTd = document.createElement("td");
@@ -309,4 +287,4 @@ function row(bond) {
 // сброс значений формы
 
 SubscribeToEvent();
-update();
+Update();
